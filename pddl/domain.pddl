@@ -11,7 +11,6 @@
         (needs ?t - task ?c - capability) ;; task needs a capability
         (at ?v - vehicle ?t - task) ;; vehicle at a particular task
         (idle ?v - vehicle) ;; vehicle is idle
-        (available ?t - task) ;; task is available
         (be_done_before ?t1 - task ?t2 - task) ;; t1 must be done before t2
         (done ?t - task) ;; task is done
     )
@@ -21,10 +20,15 @@
         :agent ?vehicle - vehicle
         :parameters (?task - task ?cap - capability)
         :precondition ( and
-            (available ?task)
             (at ?vehicle ?task)
             (has ?vehicle ?cap)
             (needs ?task ?cap)
+            (forall (?othertask - task)
+                (and
+                    (be_done_before ?othertask ?task)
+                    (done ?othertask)
+                )
+            )
         )
         :effect (and
             (done ?task)
