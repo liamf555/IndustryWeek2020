@@ -21,9 +21,6 @@
     )
 
     (:init
-        (idle uav)
-        (idle submersible)
-        (idle boat)
 
         (has uav flight)
         (has uav vision)
@@ -39,10 +36,12 @@
         (needs task_containment disperse)
         (needs task_containment containment)
 
-        ;; (be_done_before task_maparea task_containment)
-        ;; (be_done_before task_sample task_containment)
-        ;; (be_done_before task_containment task_cleanup)
-        ;; (be_done_before task_cleanup task_finish)
+        (be_done_before task_maparea task_containment)
+        (be_done_before task_sample task_containment)
+        (be_done_before task_containment task_cleanup)
+        (be_done_before task_cleanup task_finish)
+        ;;(be_done_before task_maparea task_finish)
+        ;;(be_done_before task_sample task_finish)
 
         (at uav task_init)
         (at submersible task_init)
