@@ -5,7 +5,7 @@ import dubins
 
 # To do:
 # - List capabilities, agents, tasks
-# - 
+# -
 
 #sampling, flight, dispersal, containment, vision
 
@@ -47,7 +47,7 @@ tasks = [
     ] # Arbirtary values chosen for the co-ordinates currently
 
 class Agent(object):
-    
+
     # int id
     # int turning_radius
     # int speed
@@ -91,13 +91,13 @@ class BaseSolver(object):
         return {}
 
 
-    def evaluate(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):  # input -> agent id (int), task id and time index, output - sum of times or sum of distances 
+    def evaluate(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):  # input -> agent id (int), task id and time index, output - sum of times or sum of distances
         longestdist = 0.0
 
         # specify the coordinates for the specific tuple
-        starting_coordinates = (0,0,0)    
-        
-        tasks[int - 1] 
+        starting_coordinates = (0,0,0)
+
+        tasks[int - 1]
 
 
         for anum, path in plan.items():
@@ -130,8 +130,16 @@ class BaseSolver(object):
             xy = config[:,0:2]
             agent_dist = np.linalg.norm(xy)
             total_dist += agent_dist
-    
+
         return total_dist
+
+    def dubins_distance(self, c1, c2, turning_radius=0.5):
+        return dubins.shortest_path(c1, c2, turning_radius).path_length()
+
+    def dubins_distance_between_tasks(self, t1, t2, turning_radius=0.5):
+        c1 = self.tasks[t1][1]
+        c2 = self.tasks[t2][1]
+        return self.dubins_distance(c1, c2, turning_radius)
 
     def generate_graphics(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):
         # For each task

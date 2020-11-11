@@ -7,8 +7,8 @@ from pprint import pprint
 class PDDLSolver(BaseSolver):
 
     def __init__(self,
-        agents:List[Tuple[int, Capability]],
-        tasks:List[Tuple[int, Tuple[float, float], Capability]],
+        agents:List[Tuple[int, List[Capability]]],
+        tasks:List[Tuple[int, Tuple[float, float], List[Capability]]],
         **kwargs):
         self.agents = agents
         self.tasks = tasks
@@ -30,7 +30,6 @@ class PDDLSolver(BaseSolver):
         # os.system(f'{serialize_bin} {domain_file} {problem_file} > {out_domain_file} 2> {out_problem_file}')
 
         return self.request_solver_planning(out_domain_file, out_problem_file)
-
 
     def request_solver_planning(self, domain_file, problem_file):
         data = {
@@ -55,15 +54,20 @@ class PDDLSolver(BaseSolver):
 
     def parse_pddl_plan(self, plank):
         agent2num = {'uav': 0, 'submersible': 1, 'boat':2}
-        task2num = {'task_maparea': 0, 'task_sample':1, 'task_containment':2, 'task_cleanup': 3, 'task_finish':4}
+        task2num = {'task_init': 0, 'task_maparea': 1, 'task_sample':2, 'task_containment':3, 'task_cleanup': 4, 'task_finish':5}
         plan = {0: [], 1:[], 2:[]}
+        curr_time = 0
         for i, p in enumerate(plank):
             print(p)
             name = p['name']
             comm = name[1:-1] # remove brackets
             c = comm.split(' ')
             if c[0] == 'do-move-to-task':
-                pass
+                v = c[1]
+                t1 = c[2]
+                t2 = c[3]
+                dist = self.dubins_distance_between_tasks(t1, t2)
+
             elif c[0] == 'do-do-task':
                 v = c[1]
                 t = c[2]
