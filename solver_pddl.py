@@ -1,4 +1,4 @@
-from solver_interface import BaseSolver, Capability
+from solver_interface import BaseSolver, Capability, Task
 import requests, sys
 import os
 from typing import *
@@ -58,25 +58,38 @@ class PDDLSolver(BaseSolver):
         plan = {0: [], 1:[], 2:[]}
         curr_time = 0
         for i, p in enumerate(plank):
-            print(p)
             name = p['name']
             comm = name[1:-1] # remove brackets
             c = comm.split(' ')
-            if c[0] == 'do-move-to-task':
+            if c[0] == 'start':
+                next_curr_time = curr_time
+            elif c[0] == 'finish':
+                print(next_curr_time, curr_time)
+                curr_time = next_curr_time
+            elif c[0] == 'do-move-to-task':
                 v = c[1]
-                t1 = c[2]
-                t2 = c[3]
+                t1 = task2num[c[2]]
+                t2 = task2num[c[3]]
                 dist = self.dubins_distance_between_tasks(t1, t2)
-
+                print(dist, next_curr_time, curr_time)
+                next_curr_time = max(next_curr_time, curr_time+dist)
             elif c[0] == 'do-do-task':
                 v = c[1]
                 t = c[2]
-                stuff = (task2num[t], 0.0) #need evaluate
+                stuff = (task2num[t], curr_time) #need evaluate
                 plan[agent2num[v]].append(stuff)
         return plan
 
-
 if __name__=='__main__':
-    pddlsolver = PDDLSolver([], [])
+    agents = {0: [], 1:[], 2:[]}
+    tasks = [
+        [0, Task.INIT, (0,0,0), 0],
+        [1, Task.SAMPLE, (1,1,0), 3],
+        [2, Task.CLEANUP, (2,3,0), 10],
+        [3, Task.CONTAIN, (5,3,0), 7],
+        [4, Task.MAPAREA, (2,2,0), 5],
+        [5, Task.FINISH, (0,0,0), 0]
+    ]
+    pddlsolver = PDDLSolver(agents, tasks)
     plan =  pddlsolver.solve()
     pprint(plan)

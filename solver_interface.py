@@ -27,15 +27,17 @@ class Task(Enum):
     CLEANUP = 2
     CONTAIN = 3
     MAPAREA = 4
+    INIT = 5
+    FINISH = 6
 
 # Required capabilities. Mapping between task and the capabilities required
 # to perform it.
-req_cap = {
-    (Task.SAMPLE, {Capability.SAMPLING}),
-    (Task.CLEANUP, {Capability.DISPERSAL}),
-    (Task.CONTAIN, {Capability.CONTAINMENT}),
-    (Task.MAPAREA, {Capability.VISION, Capability.FLIGHT})
-}
+req_cap = [
+    [Task.SAMPLE, {Capability.SAMPLING}],
+    [Task.CLEANUP, {Capability.DISPERSAL}],
+    [Task.CONTAIN, {Capability.CONTAINMENT}],
+    [Task.MAPAREA, {Capability.VISION, Capability.FLIGHT}]
+]
 
 # This information comes from the mission planner.
 # taskid, task type, coordinates, duration (seconds).
@@ -55,24 +57,23 @@ class Agent(object):
     # List[Tuple(float, float)] # List of frames.
 
     # Agent needs to have an ID, a list of capabilities, and a list of coordinates.
-    def __init__(self, id_input:int, speed: int, input_turning_radius:int, input_capabilities:List[Capabilities]):
+    def __init__(self, id_input:int, speed: int, input_turning_radius:int, input_capabilities:List[Capability]):
         self.id = id_input
         self.step_size = 1 / speed
         self.turning_radius = input_turning_radius
         self.coords = [(0,0)]
 
-    def navigate(self, target_coord:Tuple(float, float)):
+    def navigate(self, target_coord:Tuple[float, float]):
         start_coord = tuple(list(self.coords[-1]).append(0))
         path = dubins.shortest_path(start_coord, target_coord, turning_radius)
         configurations, _ = path.sample_many(step_size)
 
         self.coords.append(element[1:2] for element in configurations)
 
-    def wait(self, num_frames:int)
+    def wait(self, num_frames:int):
         last_coord = self.coords[-1]
         for i in xrange(num_frames):
             self.coords.append(last_coord)
-
 
     def calculate_time(self):
         pass
@@ -90,32 +91,6 @@ class BaseSolver(object):
     def solve(self, **kwargs) -> Dict[int, List[Tuple[int, float]]]: #  outputs -  agentid , list task id and time (input of the evaluate function)
         return {}
 
-
-    def evaluate(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):  # input -> agent id (int), task id and time index, output - sum of times or sum of distances
-        longestdist = 0.0
-
-        # specify the coordinates for the specific tuple
-        starting_coordinates = (0,0,0)
-
-        tasks[int - 1]
-
-
-        for anum, path in plan.items():
-            # Generate a sequence of coordinates for each agent.
-            # Each agent can be an object, and this list is assigned to them.
-            # task, location -- dubins --> next task.
-
-        # For each task:
-        #   Attribute to an agent.
-        #   Find the Dubins path and turn into a sequence of coordinates
-        #   Calculate the timw (this will be the longest time after any sequence of actions).
-        #   If we have to stall, this can still be encoded in the sequence.
-
-
-            #find distance of path
-            pass
-
-        return longestdist
 
     def evaluate(self,plan):
         total_dist = 0.0
@@ -137,9 +112,10 @@ class BaseSolver(object):
         return dubins.shortest_path(c1, c2, turning_radius).path_length()
 
     def dubins_distance_between_tasks(self, t1, t2, turning_radius=0.5):
-        c1 = self.tasks[t1][1]
-        c2 = self.tasks[t2][1]
+        c1 = self.tasks[t1][2]
+        c2 = self.tasks[t2][2]
         return self.dubins_distance(c1, c2, turning_radius)
 
-    def generate_graphics(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):
+    def generate_graphics(self, plan: Dict[int, List[Tuple[int, float]]]) -> float:
+        pass
         # For each task
