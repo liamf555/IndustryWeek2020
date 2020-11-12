@@ -110,27 +110,7 @@ for i in range(100):
     plt.xlim(-1, 1)
     plt.ylim(-1, 1)
     camera.snap()
-    # points[0] = [x + np.random.uniform(-0.1, 0.1) for x in points[0]]
-    # points[1] = [y + np.random.uniform(-0.05, 0.05) for y in points[1]]
 
-    # print(points)
-    # print(points[0])
-    # print(points[0][1])
-
-    points[0][0] += np.random.uniform(-0.01, 0.1)
-    points[1][0] += np.random.uniform(-0.01, 0.1)
-
-    
-
-    points[0][1] += np.random.uniform(-0.05, 0.05)
-    points[1][1] += np.random.uniform(-0.05, 0.05)
-
-    points[0][2] += np.random.uniform(-0.02, 0.02)
-    points[1][2] += np.random.uniform(-0.02, 0.02)
-
-
-    # points[2] = [z + np.random.uniform(-0.02, 0.02) for z in points[2]]
-    
 animation = camera.animate(interval=200) 
 plt.show()
 

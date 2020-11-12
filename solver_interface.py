@@ -3,6 +3,108 @@ import numpy as np
 from enum import Enum
 import dubins
 
+# Thinking clearly about data structures.
+# Input from PDDL solver will be dictionary - {agent1:[task_id, [pre1, pre2, ...]], agent2:[task_id, [pre1, pre2, ...]]}
+# Agent stores an ordered list of tasks = [{coord_s:(x_s, y_s), coord_e:(x_e, y_e), duration:value, precons:[pre1, pre2, ...]}]
+# For each task, need to plug in path generation algorithm; calculate path and time.
+# Then string together, 'waiting' for dependent tasks.
+
+# Get results of solver: plan
+# Method in BaseSolver, just writing here for now.
+
+######################################
+# Major limitations:
+#  o At the moment, assumes that all tasks take the same amount of time (duration is given in TaskDefinition object). In reality, some e.g. containment operations may take longer than others.
+
+class Capability(Enum):
+    SAMPLING = 1
+    DISPERSAL = 2
+    CONTAINMENT = 3
+    VISION = 4
+    FLIGHT = 5
+
+class Tasks(Enum):
+    SAMPLE = 1
+    CLEANUP = 2
+    CONTAIN = 3
+    MAPAREA = 4
+
+# Dictionary of agents. {agent_id:Agent}
+agents = {}
+
+# Dictionary of task definitions. {task_id: TaskDefinition}. TaskDefinition is an object: one object for each task.
+class TaskDefinition(object):
+   def __init__(self, i_name, i_duration:float, i_caps:List[Capability]):
+       self.name = i_name
+       self.duration = i_duration
+       self.caps = i_caps
+
+task_defs = {
+            Tasks.MAPAREA:TaskDefinition("burnoff", 100, [Capability.VISION, Capability.HIGH_SPEED]),
+            Tasks.SAMPLE:TaskDefinition("sample", 20, [Capability.SAMPLING])
+}
+
+# Maps task IDs to their definitions.
+task_map = {
+            1:task_defs[Tasks.MAPAREA],
+            2:task_defs[Tasks.SAMPLE],
+            3:task_defs[Tasks.MAPAREA]
+            }  #e.g.
+
+task_instances = []
+
+# Generate Task objects and put them into a list.
+def generateTaskList(self, plan: Dict[int, List[Tuple[int, List[int]]]]):
+    for agent_id in plan.keys():
+        # plan[agent_id] is a list of tasks. Each task is a tuple with (task_id, [prereqs. - task IDs]).
+        for task in plan[agent_id]:
+            task_num = task[0]
+            prereqs = task[1]
+            task_instances.append(Task(task_num, agents[agent_id], task_map[task_num].duration, prereqs))
+        
+
+# Iterate through tasks, populating times.
+def generateTimes():
+    for task in self.task_instances:
+        for prereq_task in task.
+
+
+class Task(object):
+    def __init__(self, input_task_id:int, assigned_agent:Agent, task_duration:float, input_prereq_tasks:List[Task]):
+        self.task_id = input_task_id
+        self.agent = assigned_agent  # Reference to assigned agent object.
+        self.duration = task_duration
+        self.prereq_tasks = input_prereq_tasks
+        self.path = Path(task_instances[)
+        self.start_time = -1
+        self.end_time = -1
+    
+
+class Path(object):
+    #coord_s = (0, 0)
+    #coord_e = (0, 0)
+    #path = []           # List of tuples of coordinates. E.g. could be Dubins path.
+    #time = #
+
+    def __init__(self, input_s_coords, input_e_coords, assigned_agent:Agent):
+        self.coord_s = input_s_coords
+        self.coord_e = input_e_coords
+        self.agent = assigned_agent
+
+        self.generatePath()
+        self.calculateTime()
+
+    # Maybe pass path generation function into this?
+    # At the moment, hardcoded to Dubins.
+    def generatePath():
+        path = dubins.shortest_path(self.coords_s, self.coords_e, self.agent.turning_radius)
+
+    # TODO implement
+    def calculateTime():
+        # This is where we deal with the step size.
+        pass
+
+
 #sampling, flight, dispersal, containment, vision
 
     #task initialisation (where they start), sample, cleanup, maparea, containment, finish (return to start)
@@ -12,18 +114,7 @@ class ObjectiveFunctions(Enum):
     TIME = 1
     CUMULATIVE_DIST = 2
 
-class Capability(Enum):
-    SAMPLING = 1
-    DISPERSAL = 2
-    CONTAINMENT = 3
-    VISION = 4
-    FLIGHT = 5
 
-class Task(Enum):
-    SAMPLE = 1
-    CLEANUP = 2
-    CONTAIN = 3
-    MAPAREA = 4
 
 # Required capabilities. Mapping between task and the capabilities required
 # to perform it.
@@ -54,7 +145,7 @@ class Agent(object):
     # List[Tuple(float, float)] # List of frames.
 
     # Agent needs to have an ID, a list of capabilities, and a list of coordinates.
-    def __init__(self, id_input:int, speed: int, input_turning_radius:int, input_capabilities:List[Capabilities]):
+    def __init__(self, id_input:int, speed:int, input_turning_radius:int, input_capabilities:List[Capabilities]):
         self.id = id_input
         self.step_size = 1 / speed
         self.turning_radius = input_turning_radius
