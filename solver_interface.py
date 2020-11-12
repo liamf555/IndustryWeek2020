@@ -24,6 +24,8 @@ class Task(Enum):
     CLEANUP = 2
     CONTAIN = 3
     MAPAREA = 4
+    INIT =  5
+    FINISH = 6
 
 # Required capabilities. Mapping between task and the capabilities required
 # to perform it.
@@ -46,7 +48,7 @@ tasks = [
 ##################################### </DON'T NEED ANY OF THIS FOR DEMO> ################################
 
 class Agent(object):
-    
+
     # int id
     # int turning_radius
     # int speed
@@ -54,15 +56,15 @@ class Agent(object):
     # List[Tuple(float, float)] # List of frames.
 
     # Agent needs to have an ID, a list of capabilities, and a list of coordinates.
-    def __init__(self, id_input:int, speed: int, input_turning_radius:int, input_capabilities:List[Capabilities]):
+    def __init__(self, id_input:int, speed: int, input_turning_radius:int, input_capabilities:List[Capability]):
         self.id = id_input
         self.step_size = 1 / speed
         self.turning_radius = input_turning_radius
         self.coords = [(0,0)]
 
-    def navigate(self, target_coord:Tuple(float, float)):
+    def navigate(self, target_coord:Tuple[float, float]):
         #self.coords[-1] is a tuple - (x,y). start_coord will be (x, y, 0).
-        start_coord = tuple(list(self.coords[-1]).append(0))
+        start_coord = list(list(self.coords[-1]).append(0))
         path = dubins.shortest_path(start_coord, target_coord, turning_radius)
         configurations, _ = path.sample_many(step_size)
 
@@ -99,13 +101,13 @@ class BaseSolver(object):
         return {}
 
 
-    def evaluate(self, plan: Dict[int, List[Tuple[int, float]]]) -> float):  # input -> agent id (int), task id and time index, output - sum of times or sum of distances 
+    def evaluate(self, plan: Dict[int, List[Tuple[int, float]]]) -> float:  # input -> agent id (int), task id and time index, output - sum of times or sum of distances
         longestdist = 0.0
 
         # specify the coordinates for the specific tuple
-        starting_coordinates = (0,0,0)    
-        
-        tasks[int - 1] 
+        starting_coordinates = (0,0,0)
+
+        tasks[int - 1]
 
 
         for anum, path in plan.items():
@@ -143,13 +145,13 @@ class BaseSolver(object):
                 xy = config[:,0:2]
                 agent_dist = np.linalg.norm(xy)
                 total_dist += agent_dist
-    
+
         return total_dist
     '''
     def evaluate(self,plan):
         total_dist = 0.0
         starting_coordinates = (0,0,0)
-        for agent in plan.keys()
+        for agent in plan.keys():
             for task in plan[agent]:
                 task_id= task[0]
                 task_coordinates = tasks[task_id-1][2]
@@ -175,7 +177,7 @@ class BaseSolver(object):
         # For each task
         # 'agent' is the agent number
         for agent in plan.keys():
-            for task in plan[agent]     # For each task that the agent needs to do
+            for task in plan[agent]:     # For each task that the agent needs to do
                 task_id= task[0]
                 task_coordinates = tasks[task_id-1][2]
                 task_duration = tasks[task_id-1][3]
