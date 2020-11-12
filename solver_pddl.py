@@ -2,6 +2,7 @@ from solver_interface import BaseSolver, Capability, Task
 import requests, sys
 import os
 from typing import *
+import copy
 from pprint import pprint
 
 class PDDLSolver(BaseSolver):
@@ -56,27 +57,20 @@ class PDDLSolver(BaseSolver):
         agent2num = {'uav': 0, 'submersible': 1, 'boat':2}
         task2num = {'task_init': 0, 'task_maparea': 1, 'task_sample':2, 'task_containment':3, 'task_cleanup': 4, 'task_finish':5}
         plan = {0: [], 1:[], 2:[]}
-        curr_time = 0
+        predecessors = copy.deepcopy(plan)
         for i, p in enumerate(plank):
             name = p['name']
             comm = name[1:-1] # remove brackets
             c = comm.split(' ')
-            if c[0] == 'start':
-                next_curr_time = curr_time
-            elif c[0] == 'finish':
-                print(next_curr_time, curr_time)
-                curr_time = next_curr_time
-            elif c[0] == 'do-move-to-task':
+            if c[0] == 'do-move-to-task':
                 v = c[1]
                 t1 = task2num[c[2]]
                 t2 = task2num[c[3]]
-                dist = self.dubins_distance_between_tasks(t1, t2)
-                print(dist, next_curr_time, curr_time)
-                next_curr_time = max(next_curr_time, curr_time+dist)
+                predecessors[agent2num[v]].append(t1)
             elif c[0] == 'do-do-task':
                 v = c[1]
                 t = c[2]
-                stuff = (task2num[t], curr_time) #need evaluate
+                stuff = (task2num[t], copy.deepcopy(predecessors[agent2num[v]]))#need evaluate
                 plan[agent2num[v]].append(stuff)
         return plan
 
