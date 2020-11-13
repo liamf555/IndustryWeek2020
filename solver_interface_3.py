@@ -170,6 +170,10 @@ class Path(object):
         # Get the number (n) of steps.
         # Then, where our speed is s (need to think about our units for speed):
         # return (n * d) / s
+        speed = 1
+
+        # step_size = 1
+        # path_points = self.path.sample_many(step_size)
 
         #step_size = #?
         #path_points = self.path.sample_many(step_size)
@@ -177,7 +181,7 @@ class Path(object):
         #d = ...
 
         # Random number, just to test overall implementation of code:
-        self.time = 10
+        self.time = self.path.path_length() / speed
 
     def calculateDistance(self):
         self.path_distance = self.path.path_length()
