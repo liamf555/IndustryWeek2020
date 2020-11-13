@@ -267,7 +267,7 @@ class BaseSolver(object):
         total_distance = 0
         for agent_id in self.agents.keys():
             for task in self.agents[agent_id].tasks:
-                total_distance += task.path_distance
+                total_distance += task.path.path_distance
         return total_distance
 
     # Maybe add a frame rate parameter
