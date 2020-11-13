@@ -1,4 +1,4 @@
-from solver_interface import BaseSolver, Capability, Task, Agent
+from solver_interface_3 import BaseSolver, Capability, Tasks, Agent
 import requests, sys
 import multiprocessing as mp
 import os
@@ -109,6 +109,16 @@ class Chromosome(object):
         for idx, assn in idx_assignemnts:
             self.set_assignment(idx, assn)
 
+    def to_dict(self):
+        agent_dict = {i:[0] for i in [a.id for a in self.agents]}
+        for assn in self.assignments:
+            task = assn.task
+            agent = assn.agent
+            tup = (task.id, [task.get_pred()] if task.get_pred()!=-1 else [], assn.heading)
+            agent_dict[agent.id].append(tup)
+
+        return agent_dict
+
     def __repr__(self):
         return str(self.assignments)
 
@@ -175,16 +185,16 @@ class GASolver(BaseSolver):
             1:[(2,[0])],
             2:[(3,[0]),(4,[0,3])]
         }
-
-        plan_predec = {t[0]:-1 for t in self.tasks}
+        print(self.tasks)
+        plan_predec = {t.id:-1 for t in self.tasks.values()}
         for p in plan.values():
             for kc, pred in p:
                 plan_predec[kc] = max(plan_predec[kc], np.max(pred))
 
-        _agents = [_Agent(i, c) for i, c in self.agents.items()]
+        _agents = [_Agent(i, c.capabilities) for i, c in self.agents.items()]
         # print(_agents)
         # print(plan_predec)
-        _tasks = [_Task(t[0], t[2][0], t[2][1], t[4], plan_predec[t[0]]) for t in self.tasks]
+        _tasks = [_Task(t.id, t.coords[0], t.coords[1], t.capabilities, plan_predec[t.id]) for t in self.tasks.values()]
         print(_tasks)
 
         self.toolbox = base.Toolbox()
@@ -205,10 +215,9 @@ class GASolver(BaseSolver):
 
         hof = self.quickrun(numgen=2, popsize=10, halloffame=1)
 
-        for h in hof:
-            print(h)
+        bestout = hof[0].to_dict()
 
-        return hof
+        return bestout
 
     def quickrun(self, numgen=20, popsize=100, halloffame=1, cxpb=0.5, mutpb=0.2):
         pop = self.toolbox.population(n=popsize)
@@ -221,12 +230,12 @@ class GASolver(BaseSolver):
 if __name__=='__main__':
     agents = {0: [Capability.VISION, Capability.FLIGHT], 1:[Capability.VISION, Capability.SAMPLING], 2:[Capability.DISPERSAL, Capability.CONTAINMENT]}
     tasks = [
-        [0, Task.INIT, (0,0,0), 0, {}],
-        [1, Task.SAMPLE, (1,1,0), 3, {Capability.SAMPLING}],
-        [2, Task.CLEANUP, (2,3,0), 10, {Capability.DISPERSAL}],
-        [3, Task.CONTAIN, (5,3,0), 7, {Capability.CONTAINMENT}],
-        [4, Task.MAPAREA, (2,2,0), 5, {Capability.VISION, Capability.FLIGHT}],
-        [5, Task.FINISH, (0,0,0), 0, {}]
+        [0, Tasks.INIT, (0,0,0), 0, {}],
+        [1, Tasks.SAMPLE, (1,1,0), 3, {Capability.SAMPLING}],
+        [2, Tasks.CLEANUP, (2,3,0), 10, {Capability.DISPERSAL}],
+        [3, Tasks.CONTAIN, (5,3,0), 7, {Capability.CONTAINMENT}],
+        [4, Tasks.MAPAREA, (2,2,0), 5, {Capability.VISION, Capability.FLIGHT}],
+        [5, Tasks.FINISH, (0,0,0), 0, {}]
     ]
 
     gasolver = GASolver(agents, tasks)

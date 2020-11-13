@@ -1,4 +1,4 @@
-from solver_interface import BaseSolver, Capability, Task
+from solver_interface_3 import BaseSolver, Capability, Tasks
 import requests, sys
 import os
 from typing import *
@@ -70,19 +70,19 @@ class PDDLSolver(BaseSolver):
             elif c[0] == 'do-do-task':
                 v = c[1]
                 t = c[2]
-                stuff = (task2num[t], copy.deepcopy(predecessors[agent2num[v]]))#need evaluate
+                stuff = (task2num[t], copy.deepcopy(predecessors[agent2num[v]]), 0.0) #need evaluate
                 plan[agent2num[v]].append(stuff)
         return plan
 
 if __name__=='__main__':
     agents = {0: [], 1:[], 2:[]}
     tasks = [
-        [0, Task.INIT, (0,0,0), 0],
-        [1, Task.SAMPLE, (1,1,0), 3],
-        [2, Task.CLEANUP, (2,3,0), 10],
-        [3, Task.CONTAIN, (5,3,0), 7],
-        [4, Task.MAPAREA, (2,2,0), 5],
-        [5, Task.FINISH, (0,0,0), 0]
+        [0, Tasks.INIT, (0,0,0), 0],
+        [1, Tasks.SAMPLE, (1,1,0), 3],
+        [2, Tasks.CLEANUP, (2,3,0), 10],
+        [3, Tasks.CONTAIN, (5,3,0), 7],
+        [4, Tasks.MAPAREA, (2,2,0), 5],
+        [5, Tasks.FINISH, (0,0,0), 0]
     ]
     pddlsolver = PDDLSolver(agents, tasks)
     plan =  pddlsolver.solve()

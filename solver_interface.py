@@ -63,12 +63,12 @@ def generateTaskList(self, plan: Dict[int, List[Tuple[int, List[int]]]]):
             task_num = task[0]
             prereqs = task[1]
             task_instances.append(Task(task_num, agents[agent_id], task_map[task_num].duration, prereqs))
-        
+
 
 # Iterate through tasks, populating times.
-def generateTimes():
-    for task in self.task_instances:
-        for prereq_task in task.
+# def generateTimes():
+#     for task in self.task_instances:
+#         for prereq_task in task.
 
 
 class Task(object):
@@ -77,10 +77,10 @@ class Task(object):
         self.agent = assigned_agent  # Reference to assigned agent object.
         self.duration = task_duration
         self.prereq_tasks = input_prereq_tasks
-        self.path = Path(task_instances[)
+        # self.path = Path(task_instances[)
         self.start_time = -1
         self.end_time = -1
-    
+
 
 class Path(object):
     #coord_s = (0, 0)

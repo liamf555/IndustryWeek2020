@@ -27,6 +27,7 @@ class Tasks(Enum):
     CLEANUP = 2
     CONTAIN = 3
     MAPAREA = 4
+    FINISH = 5
 
 
 # Will store capabilities etc.
@@ -43,9 +44,13 @@ class Agent(AgentDefn):
         self.speed = input_speed
         self.turning_radius = input_turning_radius
         self.tasks = []     # Ordered list of tasks. Tasks are added in order.
+        self.capabilities = set()
 
     def addTask(self, task):
         self.tasks.append(task)
+
+    def addCapability(self, cap:Capability):
+        self.capabilities.add(cap)
 
     # Iterate through sequential tasks and generate paths.
     def generatePaths(self):
@@ -75,6 +80,7 @@ class Task(object):
         self.id = input_id
         self.type = input_type
         self.coords = input_coords
+        self.capabilities = set()
 
         # Special override for initial task. Need this for the recursion in generateTimes().
         if (self.type == Tasks.INIT):
@@ -86,12 +92,15 @@ class Task(object):
             self.start_time = -1
             self.end_time = -1
 
+    def addCapability(self, cap:Capability):
+        self.capabilities.add(cap)
+
     def set_end_angle(self, angle):
         self.end_angle = angle
 
     # TODO Do we still need this?
     # Assigns the actual agent object (not just ID).
-    #def assign_agent(self, agent_id):  
+    #def assign_agent(self, agent_id):
     #    self.agent = agents[agent_id]
 
     def generatePathTo(self, prev_coords, prev_angle, turning_radius): #agent:Agent):
@@ -132,7 +141,7 @@ class Path(object):
         self.coord_s = input_start_coords
         self.coord_e = input_end_coords
         self.start_angle = input_start_angle
-        self.end_angle - input_end_angle
+        self.end_angle = input_end_angle
         self.turning_radius = input_turning_radius
         #self.agent = input_agent
 
@@ -160,8 +169,8 @@ class Path(object):
 
     def calculateDistance(self):
         self.path_distance = self.path.path_length()
-        
-                
+
+
 
 
 class BaseSolver(object):
@@ -215,7 +224,7 @@ class BaseSolver(object):
                 task.set_end_angle(angle)
                 # Assign task to agent
                 self.agents[agent_id].addTask(task)
-    
+
     # Build the paths between tasks for each agent.
     def setupPaths(self):
         # For each agent...
@@ -267,5 +276,5 @@ class BaseSolver(object):
         c1 = self.tasks[t1][2]
         c2 = self.tasks[t2][2]
         return self.dubins_distance(c1, c2, turning_radius)
-    
+
     ##################

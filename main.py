@@ -1,4 +1,4 @@
-from solver_interface_3 import Capability, Tasks 
+from solver_interface_3 import Capability, Tasks, Agent, Task
 from solver_ga import GASolver
 from solver_pddl import PDDLSolver
 from matplotlib import pyplot as plt
@@ -6,37 +6,54 @@ from celluloid import Camera
 import numpy as np
 
 def main():
-    # To be hardcoded/populated by mission planning system.
-    tasks = {
-        1:Task(1, Tasks.MAPAREA, (3, 4), 20),
-        2:Task(2, Tasks.CONTAIN, (10, 9), 100)
-        }
-    # To be hardcoded/populated by mission planning system.
-    agents = {
-        1:Agent(1, "UAV", 3, 2),
-        2:Agent(2, "Ship", 2, 3),
-        3:Agent(3, "Sub", 1, 1)
-    }
+    t0 = Task(0, Tasks.INIT, (0, 0), 0)
+    t1= Task(1, Tasks.MAPAREA, (1, 1), 3)
+    t1.addCapability(Capability.VISION)
+    t1.addCapability(Capability.FLIGHT)
+    t2 = Task(2, Tasks.SAMPLE, (2, 3), 20)
+    t2.addCapability(Capability.SAMPLING)
+    t3 = Task(3, Tasks.CONTAIN, (5, 3), 15)
+    t3.addCapability(Capability.CONTAINMENT)
+    t4 = Task(4, Tasks.CLEANUP, (2, 2), 9)
+    t4.addCapability(Capability.DISPERSAL)
+    t5 = Task(5, Tasks.FINISH, (0, 0), 0)
+    ts = [t0, t1, t2, t3, t4, t5]
 
-    
+    a1 = Agent(0, "uav", 3, 2)
+    a1.addCapability(Capability.VISION)
+    a1.addCapability(Capability.FLIGHT)
+    a2 = Agent(1, "boat", 2, 3)
+    a2.addCapability(Capability.VISION)
+    a2.addCapability(Capability.SAMPLING)
+    a3 = Agent(2, "submersible", 1, 1)
+    a3.addCapability(Capability.DISPERSAL)
+    a3.addCapability(Capability.CONTAINMENT)
+    ats = [a1, a2, a3]
+
+    # To be hardcoded/populated by mission planning system.
+    tasks = { i: t for i, t in enumerate(ts)}
+    # To be hardcoded/populated by mission planning system.
+    agents = { i : t for i, t in enumerate(ats)}
+
     solver = GASolver(agents, tasks)
     plan = solver.solve()
 
+    print(plan)
+    exit()
 
-
-    # very basic cricle to show oil 
+    # very basic cricle to show oil
     circle1 = plt.Circle((0.5, 0.5), 0.2, color='k')
 
     for i in ( ):
-        
-    
+
+
         plt.scatter( ( ) , ( ) , c = marker_colors)
-        
+
 
         #bit of code to add names of agent to points
         for i, txt in enumerate( ):
             plt.annotate(txt, (points[0][i], points[1][i]))
-        
+
         #background colour
         ax.set_facecolor("blue")
 
@@ -48,7 +65,7 @@ def main():
         camera.snap()
 
     #generates animation based on snaps, uses matplotlib.animation.ArtistAnimation underneath
-    animation = camera.animate(interval=200) 
+    animation = camera.animate(interval=200)
     plt.show()
 
 
