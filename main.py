@@ -4,6 +4,7 @@ from solver_pddl import PDDLSolver
 from matplotlib import pyplot as plt
 from celluloid import Camera
 import numpy as np
+import math
 
 def main():
     t0 = Task(0, Tasks.INIT, (0, 0), 0)
@@ -38,35 +39,53 @@ def main():
     solver = GASolver(agents, tasks)
     plan = solver.solve()
 
+    #solver = GASolver(agents, tasks)
+    #plan = solver.solve()
+
+
+    plan = {
+            1:[(1, [0], (math.pi / 4)), (3, [0], (math.pi /3))],
+            # Just [2] - no 0, depends on previous task for agent 2 which it should anyway.
+            # [] - test case when it doesn't depend on anything -- would this happen as an output?
+            2:[(2, [0, 3], (-math.pi / 6)), (4, [2], math.pi), (5, [0], (-math.pi / 5))]
+            }
+
+    bs = BaseSolver(agents, tasks)
+    bs.setPlan(plan)
+    print(bs.evaluate_time())
+    print(bs.evaluate_total_distance())
+
+
     print(plan)
     exit()
 
-    # very basic cricle to show oil
-    circle1 = plt.Circle((0.5, 0.5), 0.2, color='k')
 
-    for i in ( ):
+    # # very basic cricle to show oil
+    # circle1 = plt.Circle((0.5, 0.5), 0.2, color='k')
 
-
-        plt.scatter( ( ) , ( ) , c = marker_colors)
+    # for i in ( ):
 
 
-        #bit of code to add names of agent to points
-        for i, txt in enumerate( ):
-            plt.annotate(txt, (points[0][i], points[1][i]))
+    #     plt.scatter( ( ) , ( ) , c = marker_colors)
 
-        #background colour
-        ax.set_facecolor("blue")
 
-        #set plot limits if necessary
-        plt.xlim(-1, 1)
-        plt.ylim(-1, 1)
+    #     #bit of code to add names of agent to points
+    #     for i, txt in enumerate( ):
+    #         plt.annotate(txt, (points[0][i], points[1][i]))
 
-        #celluloid steps snapshot
-        camera.snap()
+    #     #background colour
+    #     ax.set_facecolor("blue")
 
-    #generates animation based on snaps, uses matplotlib.animation.ArtistAnimation underneath
-    animation = camera.animate(interval=200)
-    plt.show()
+    #     #set plot limits if necessary
+    #     plt.xlim(-1, 1)
+    #     plt.ylim(-1, 1)
+
+    #     #celluloid steps snapshot
+    #     camera.snap()
+
+    # #generates animation based on snaps, uses matplotlib.animation.ArtistAnimation underneath
+    # animation = camera.animate(interval=200)
+    # plt.show()
 
 
 

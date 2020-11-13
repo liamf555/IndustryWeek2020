@@ -115,12 +115,14 @@ class Task(object):
     # Populates start and end times for all tasks in dependency chain.
     # Call this on every task object (as occurs in BaseSolver.resolveTaskTimingDependencies())
     # to populate the start and end times of all task objects.
-    def generateTimes(self):# -> float:
+    # TODO I don't really like passing 'tasks' in here.
+    def generateTimes(self, tasks):# -> float:
         if (self.end_time != -1):
             return self.end_time
         else:
             # TODO verify that this is correct syntax.
-            self.start_time = max(prereq.generateTimes() for prereq in self.prereq_tasks)
+            # TODO I don't really like passing 'tasks' in here.
+            self.start_time = max(tasks[prereq].generateTimes(tasks) for prereq in self.prereq_tasks)
             self.end_time = self.start_time + self.path.getTime() + self.duration
         return self.end_time
 
@@ -152,8 +154,12 @@ class Path(object):
     # Maybe pass path generation function into this?
     # At the moment, hardcoded to Dubins.
     def generatePath(self):
-        start_params = tuple(list(self.coord_s).append(self.start_angle))
-        end_params = tuple(list(self.coord_e).append(self.end_angle))
+        dubins_start_list = list(self.coord_s)
+        dubins_start_list.append(self.start_angle)
+        dubins_end_list = list(self.coord_e)
+        dubins_end_list.append(self.end_angle)
+        start_params = tuple(dubins_start_list)
+        end_params = tuple(dubins_end_list)
         self.path = dubins.shortest_path(start_params, end_params, self.turning_radius)
 
     # TODO implement
@@ -164,6 +170,12 @@ class Path(object):
         # Get the number (n) of steps.
         # Then, where our speed is s (need to think about our units for speed):
         # return (n * d) / s
+
+        #step_size = #?
+        #path_points = self.path.sample_many(step_size)
+        #n = len(path_points) - 1
+        #d = ...
+
         # Random number, just to test overall implementation of code:
         self.time = 10
 
@@ -197,7 +209,7 @@ class BaseSolver(object):
     # Get ready for evaluation.
     def setup(self):
         self.associate()
-        self.generatePaths()
+        self.setupPaths()
         self.resolveTaskTimingDependencies()
 
     # Sets up references between Task and Agent objects.
@@ -237,19 +249,21 @@ class BaseSolver(object):
         # For each task:
         for agent in self.agents.values():
             for task in agent.tasks:
-                task.generateTimes()
+                task.generateTimes(self.tasks)
 
     # Provides the time taken for a solution.
     # This is the maximum (latest) end time of the last task of any agent.
     def evaluate_time(self) -> float:
         end_times = []
         for agent_id in self.agents.keys():
-            end_times.apped(self.agents[agent_id].tasks[-1].end_time);
+            if (len(self.agents[agent_id].tasks) > 0):
+                agent_end_time = self.agents[agent_id].tasks[-1].end_time
+            end_times.append(agent_end_time)
         return max(end_times)
 
     # Sums the total distance that each agent travels.
     # Returns the sum of all of these distances.
-    def evaluate_total_distance(self):
+    def evaluate_total_distance(self) -> float:
         total_distance = 0
         for agent_id in self.agents.keys():
             for task in self.agents[agent_id].tasks:
