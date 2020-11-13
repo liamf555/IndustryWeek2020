@@ -43,17 +43,17 @@ def main():
     #plan = solver.solve()
 
 
-    plan = {
-            1:[(1, [0], (math.pi / 4)), (3, [0], (math.pi /3))],
-            # Just [2] - no 0, depends on previous task for agent 2 which it should anyway.
-            # [] - test case when it doesn't depend on anything -- would this happen as an output?
-            2:[(2, [0, 3], (-math.pi / 6)), (4, [2], math.pi), (5, [0], (-math.pi / 5))]
-            }
+    # plan = {
+    #         1:[(1, [0], (math.pi / 4)), (3, [0], (math.pi /3))],
+    #         # Just [2] - no 0, depends on previous task for agent 2 which it should anyway.
+    #         # [] - test case when it doesn't depend on anything -- would this happen as an output?
+    #         2:[(2, [0, 3], (-math.pi / 6)), (4, [2], math.pi), (5, [0], (-math.pi / 5))]
+    #         }
 
-    bs = BaseSolver(agents, tasks)
-    bs.setPlan(plan)
-    print(bs.evaluate_time())
-    print(bs.evaluate_total_distance())
+    # bs = BaseSolver(agents, tasks)
+    # bs.setPlan(plan)
+    # print(bs.evaluate_time())
+    # print(bs.evaluate_total_distance())
 
 
     print(plan)

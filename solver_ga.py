@@ -114,7 +114,7 @@ class Chromosome(object):
         for assn in self.assignments:
             task = assn.task
             agent = assn.agent
-            tup = (task.id, [task.get_pred()] if task.get_pred()!=-1 else [], assn.heading)
+            tup = (task.id, [task.get_pred()] if task.get_pred()!=-1 else [0], assn.heading)
             agent_dict[agent.id].append(tup)
 
         return agent_dict
