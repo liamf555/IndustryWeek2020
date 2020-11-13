@@ -1,6 +1,7 @@
-from solver_interface_3 import Capability, Tasks, Agent, Task
+from solver_interface_3 import Capability, Tasks, Agent, Task, BaseSolver
 from solver_ga import GASolver
 from solver_pddl import PDDLSolver
+from pprint import pprint
 from matplotlib import pyplot as plt
 from celluloid import Camera
 import numpy as np
@@ -36,34 +37,89 @@ def main():
     # To be hardcoded/populated by mission planning system.
     agents = { i : t for i, t in enumerate(ats)}
 
-    solver = GASolver(agents, tasks)
-    plan = solver.solve()
+    solver_GA = GASolver(agents, tasks)
+    plan_GA = solver_GA.solve()
 
-    #solver = GASolver(agents, tasks)
-    #plan = solver.solve()
+    # solver_PDDL = PDDLSolver(agents, tasks)
+    # plan_PDDL = solver_PDDL.solve()
+
+    bs = BaseSolver(agents, tasks)
+    bs.setPlan(plan_GA)
+    frames = bs.getGraphics(5)
+
+    # print(str(tasks[0].type).split('.'))
+
+    task_coords = [x.coords for x in tasks.values()]
+
+    task_coords = list(zip(*task_coords))
+
+    task_names = [str(x.type).split('.')[1] for x in tasks.values()]
+
+  
+
+    fig, ax = plt.subplots()
+    camera = Camera(fig)
+
+    names = [x.name for x in frames.values()]
+
+    marker_colors = ['r', 'w', 'g']
 
 
-    # plan = {
-    #         1:[(1, [0], (math.pi / 4)), (3, [0], (math.pi /3))],
-    #         # Just [2] - no 0, depends on previous task for agent 2 which it should anyway.
-    #         # [] - test case when it doesn't depend on anything -- would this happen as an output?
-    #         2:[(2, [0, 3], (-math.pi / 6)), (4, [2], math.pi), (5, [0], (-math.pi / 5))]
-    #         }
 
-    # bs = BaseSolver(agents, tasks)
-    # bs.setPlan(plan)
-    # print(bs.evaluate_time())
-    # print(bs.evaluate_total_distance())
+    for i in range(len(frames[0].frames)):
+
+        agent_coords = [x.frames[i] for x in frames.values()]
+        
+        agent_coords = list(zip(*agent_coords))
+
+        # print(coords)
+        plt.scatter(agent_coords[0], agent_coords[1], c = marker_colors)
+
+        plt.scatter(task_coords[0], task_coords[1], c = 'k')
+
+        for i, txt in enumerate(names):
+            plt.annotate(txt, (agent_coords[0][i], agent_coords[1][i]))
+
+        for i, txt in enumerate(task_names):
+            plt.annotate(txt, (task_coords[0][i], task_coords[1][i]))
+    
+        ax.set_facecolor("blue")
+    # plt.xlim(-1, 1)
+    # plt.ylim(-1, 1)
+        camera.snap()
+
+    animation = camera.animate(interval=200) 
+    plt.show()
 
 
-    print(plan)
+
+
+
+
+
+
+    # print(plan_GA)
+
+    # pprint(bs.plan)
+
+
+
+
+
+ 
+
+   
+
+
+
+    
     exit()
 
 
     # # very basic cricle to show oil
     # circle1 = plt.Circle((0.5, 0.5), 0.2, color='k')
 
-    # for i in ( ):
+    # 
 
 
     #     plt.scatter( ( ) , ( ) , c = marker_colors)

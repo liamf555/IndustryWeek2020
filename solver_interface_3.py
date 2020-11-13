@@ -1,7 +1,7 @@
 # TODO
 #[o]Still need to finish implementing angle system.
 # o What are the units/relative speed of speed? At the moment it is just an arbitrary number.
-# o Implement Path.calculateTime()
+#[o]Implement Path.calculateTime()
 # LIMITATIONS
 # o Initial position assumed to be (0,0) for all agents.
 # o Initial angle assumed to be 0 for all agents.
@@ -45,6 +45,10 @@ class Agent(AgentDefn):
         self.turning_radius = input_turning_radius
         self.tasks = []     # Ordered list of tasks. Tasks are added in order.
         self.capabilities = set()
+        self.frames = []
+
+    def getFrames():
+        return self.frames
 
     def addTask(self, task):
         self.tasks.append(task)
@@ -60,14 +64,16 @@ class Agent(AgentDefn):
                 start_coords = (0, 0)
                 start_angle = 0
 
-            self.tasks[task_index].generatePathTo(start_coords, start_angle, self.turning_radius)
+            self.tasks[task_index].generatePathTo(start_coords, start_angle, self.turning_radius, self.speed)
 
             # Starting coords of next task path are finishing coords of this one.
             start_coords = self.tasks[task_index].coords
             start_angle = self.tasks[task_index].end_angle
 
-    def generateFramesForGraphics(self):
-        self.frames = []
+    def generateFramesForGraphics(self, frame_rate):
+        for task in self.tasks:
+            task.generateFrames(self.speed, frame_rate)
+            self.frames = self.frames + task.frames
 
     # Not needed - tasks are already in order.
     # TODO implement. Sort tasks in order of increasing start time.
@@ -103,9 +109,9 @@ class Task(object):
     #def assign_agent(self, agent_id):
     #    self.agent = agents[agent_id]
 
-    def generatePathTo(self, prev_coords, prev_angle, turning_radius): #agent:Agent):
+    def generatePathTo(self, prev_coords, prev_angle, turning_radius, speed): #agent:Agent):
         # Path to task.
-        self.path = Path(prev_coords, self.coords, prev_angle, self.end_angle, turning_radius)
+        self.path = Path(prev_coords, self.coords, prev_angle, self.end_angle, turning_radius, speed)
 
 
     def assign_prereq_tasks(self, input_prereq_tasks):
@@ -126,6 +132,16 @@ class Task(object):
             self.end_time = self.start_time + self.path.getTime() + self.duration
         return self.end_time
 
+    # frame_rate = frames per second.
+    def generateFrames(self, speed, frame_rate):
+        distance_per_frame = speed / frame_rate     # d = s * t => t = 1 / frame_rate
+        # Generate points for Dubins path. Each point will be a frame.
+        self.frames, _ = self.path.path.sample_many(distance_per_frame)
+        #print(self.frames)
+        # Is there a more efficient way of doing this?
+        for i in range(frame_rate * self.duration):
+            self.frames.append(self.coords)
+
 
 # Tasks have paths (path to the task)
 class Path(object):
@@ -139,12 +155,13 @@ class Path(object):
         return self.time
 
     ### [Old comment] Wants an actual agent object, not the agent ID
-    def __init__(self, input_start_coords, input_end_coords, input_start_angle, input_end_angle, input_turning_radius): #input_agent:Agent):
+    def __init__(self, input_start_coords, input_end_coords, input_start_angle, input_end_angle, input_turning_radius, input_agent_speed): #input_agent:Agent):
         self.coord_s = input_start_coords
         self.coord_e = input_end_coords
         self.start_angle = input_start_angle
         self.end_angle = input_end_angle
         self.turning_radius = input_turning_radius
+        self.agent_speed = input_agent_speed
         #self.agent = input_agent
 
         self.generatePath()
@@ -162,26 +179,17 @@ class Path(object):
         end_params = tuple(dubins_end_list)
         self.path = dubins.shortest_path(start_params, end_params, self.turning_radius)
 
-    # TODO implement
     def calculateTime(self):
-        # This is where we deal with the step size.
-        # Choose a step size.
-        # Get the distance (d) of each step.
-        # Get the number (n) of steps.
-        # Then, where our speed is s (need to think about our units for speed):
-        # return (n * d) / s
-        speed = 1
+        # Distances in metres.
+        # Speed in m / s
+        # Time in seconds
+        # return (n * d) / s, n = number of steps, d = step_size = distance between points, s = speed.
+        
+        #distance_between_points_m = 0.1   # 10cm
+        #points, _ = d_path.sample_many(distance_between_points)
+        #self.time = (len(points) * distance_between_points) / self.agent_speed
 
-        # step_size = 1
-        # path_points = self.path.sample_many(step_size)
-
-        #step_size = #?
-        #path_points = self.path.sample_many(step_size)
-        #n = len(path_points) - 1
-        #d = ...
-
-        # Random number, just to test overall implementation of code:
-        self.time = self.path.path_length() / speed
+        self.time = self.path.path_length() / self.agent_speed
 
     def calculateDistance(self):
         self.path_distance = self.path.path_length()
@@ -274,12 +282,12 @@ class BaseSolver(object):
                 total_distance += task.path.path_distance
         return total_distance
 
-    # Maybe add a frame rate parameter
-    def getGraphics(self) -> Dict[int, Agent]:
+    # Frame rate parameter = number of frames per second.
+    def getGraphics(self, frame_rate) -> Dict[int, Agent]:
         # Keys will be the same as agents param passed into init.
         return_agents = {}
         for agent in self.agents.values():
-            agent.generateFramesForGraphics()
+            agent.generateFramesForGraphics(frame_rate)
             return_agents[agent.id] = agent
         return return_agents
 

@@ -110,7 +110,7 @@ class Chromosome(object):
             self.set_assignment(idx, assn)
 
     def to_dict(self):
-        agent_dict = {i:[0] for i in [a.id for a in self.agents]}
+        agent_dict = {i:[] for i in [a.id for a in self.agents]}
         for assn in self.assignments:
             task = assn.task
             agent = assn.agent
