@@ -45,7 +45,11 @@ def main():
 
     bs = BaseSolver(agents, tasks)
     bs.setPlan(plan_GA)
-    frames = bs.getGraphics(5)
+
+    framerate = 60
+
+
+    frames = bs.getGraphics(framerate)
 
     # print(str(tasks[0].type).split('.'))
 
@@ -88,62 +92,12 @@ def main():
     # plt.ylim(-1, 1)
         camera.snap()
 
-    animation = camera.animate(interval=200) 
+
+    interval = (1/framerate) * 1000
+    animation = camera.animate(interval=interval) 
     plt.show()
 
-
-
-
-
-
-
-
-    # print(plan_GA)
-
-    # pprint(bs.plan)
-
-
-
-
-
- 
-
-   
-
-
-
-    
     exit()
-
-
-    # # very basic cricle to show oil
-    # circle1 = plt.Circle((0.5, 0.5), 0.2, color='k')
-
-    # 
-
-
-    #     plt.scatter( ( ) , ( ) , c = marker_colors)
-
-
-    #     #bit of code to add names of agent to points
-    #     for i, txt in enumerate( ):
-    #         plt.annotate(txt, (points[0][i], points[1][i]))
-
-    #     #background colour
-    #     ax.set_facecolor("blue")
-
-    #     #set plot limits if necessary
-    #     plt.xlim(-1, 1)
-    #     plt.ylim(-1, 1)
-
-    #     #celluloid steps snapshot
-    #     camera.snap()
-
-    # #generates animation based on snaps, uses matplotlib.animation.ArtistAnimation underneath
-    # animation = camera.animate(interval=200)
-    # plt.show()
-
-
 
 if __name__=='__main__':
     main()
