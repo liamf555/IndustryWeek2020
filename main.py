@@ -46,12 +46,9 @@ def main():
     bs = BaseSolver(agents, tasks)
     bs.setPlan(plan_GA)
 
-    framerate = 60
-
+    framerate = 5
 
     frames = bs.getGraphics(framerate)
-
-    # print(str(tasks[0].type).split('.'))
 
     task_coords = [x.coords for x in tasks.values()]
 
@@ -60,7 +57,6 @@ def main():
     task_names = [str(x.type).split('.')[1] for x in tasks.values()]
 
   
-
     fig, ax = plt.subplots()
     camera = Camera(fig)
 
@@ -69,14 +65,12 @@ def main():
     marker_colors = ['r', 'w', 'g']
 
 
-
     for i in range(len(frames[0].frames)):
 
         agent_coords = [x.frames[i] for x in frames.values()]
         
         agent_coords = list(zip(*agent_coords))
 
-        # print(coords)
         plt.scatter(agent_coords[0], agent_coords[1], c = marker_colors)
 
         plt.scatter(task_coords[0], task_coords[1], c = 'k')
@@ -87,7 +81,7 @@ def main():
         for i, txt in enumerate(task_names):
             plt.annotate(txt, (task_coords[0][i], task_coords[1][i]))
     
-        ax.set_facecolor("blue")
+        ax.set_facecolor("xkcd:sky blue")
     # plt.xlim(-1, 1)
     # plt.ylim(-1, 1)
         camera.snap()
