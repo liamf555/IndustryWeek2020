@@ -9,46 +9,108 @@ import math
 from matplotlib.path import Path
 import matplotlib.patches as patches
 
-def main():
+def set_up_tasks():
+    # id, type, coords, duration
     t0 = Task(0, Tasks.INIT, (0, 0), 0)
-    t1= Task(1, Tasks.MAPAREA, (1, 1), 3)
+    t1= Task(1, Tasks.MAPAREA, (1, 1), 5)
     t1.addCapability(Capability.VISION)
     t1.addCapability(Capability.FLIGHT)
-    t2 = Task(2, Tasks.SAMPLE, (2, 3), 20)
+    t2 = Task(2, Tasks.SAMPLE, (2, 3), 10)
     t2.addCapability(Capability.SAMPLING)
-    t3 = Task(3, Tasks.CONTAIN, (5, 3), 15)
+    t3 = Task(3, Tasks.CONTAIN, (5, 3),20)
     t3.addCapability(Capability.CONTAINMENT)
-    t4 = Task(4, Tasks.CLEANUP, (2, 2), 9)
+    t4 = Task(4, Tasks.CLEANUP, (2, 2), 12)
     t4.addCapability(Capability.DISPERSAL)
     t5 = Task(5, Tasks.FINISH, (0, 0), 0)
     ts = [t0, t1, t2, t3, t4, t5]
 
+    # To be hardcoded/populated by mission planning system.
+    return { i: t for i, t in enumerate(ts)}
+
+def set_up_agents():
+    # id, name, speed, turning radius -- see solver_interface_3.Agent
     a1 = Agent(0, "uav", 3, 2)
     a1.addCapability(Capability.VISION)
     a1.addCapability(Capability.FLIGHT)
-    a2 = Agent(1, "boat", 2, 3)
+    a2 = Agent(1, "boat", 2, 1.5)
     a2.addCapability(Capability.VISION)
     a2.addCapability(Capability.SAMPLING)
-    a3 = Agent(2, "submersible", 1, 1)
+    a3 = Agent(2, "submersible", 4, 1)
     a3.addCapability(Capability.DISPERSAL)
     a3.addCapability(Capability.CONTAINMENT)
     ats = [a1, a2, a3]
 
     # To be hardcoded/populated by mission planning system.
-    tasks = { i: t for i, t in enumerate(ts)}
-    # To be hardcoded/populated by mission planning system.
-    agents = { i : t for i, t in enumerate(ats)}
+    return { i : t for i, t in enumerate(ats)}
 
+def set_up_tasks_2():
+    # id, type, coords, duration
+    t0 = Task(0, Tasks.INIT, (0, 0), 0)
+    t1= Task(1, Tasks.MAPAREA, (1, 1), 5)
+    t1.addCapability(Capability.VISION)
+    t1.addCapability(Capability.FLIGHT)
+    t2 = Task(2, Tasks.SAMPLE, (2, 3), 10)
+    t2.addCapability(Capability.SAMPLING)
+    t3 = Task(3, Tasks.SAMPLE, (-4,-3), 10)
+    t3.addCapability(Capability.SAMPLING)
+    t4 = Task(4, Tasks.CONTAIN, (5, 3), 20)
+    t4.addCapability(Capability.CONTAINMENT)
+    t5 = Task(5, Tasks.CLEANUP, (2, 2), 12)
+    t5.addCapability(Capability.DISPERSAL)
+    t6 = Task(6, Tasks.FINISH, (0, 0), 0)
+    ts = [t0, t1, t2, t3, t4, t5, t6]
+
+    # To be hardcoded/populated by mission planning system.
+    return { i: t for i, t in enumerate(ts)}
+    
+def set_up_agents_2():
+    # id, name, speed, turning radius -- see solver_interface_3.Agent
+    a1 = Agent(0, "uav", 3, 0.2)
+    a1.addCapability(Capability.VISION)
+    a1.addCapability(Capability.FLIGHT)
+    a2 = Agent(1, "boat", 2, 0.3)
+    a2.addCapability(Capability.VISION)
+    a2.addCapability(Capability.SAMPLING)
+    a2.addCapability(Capability.CONTAINMENT)
+    a3 = Agent(2, "submersible", 4, 0.1)
+    a3.addCapability(Capability.DISPERSAL)
+    ats = [a1, a2, a3]
+
+    # To be hardcoded/populated by mission planning system.
+    return { i : t for i, t in enumerate(ats)}
+
+def main():
+    agents = set_up_agents()
+    tasks = set_up_tasks()
+
+    # There seems to be an error if both of these solver instances/comparison code
+    # are active at the same time.
     solver_GA = GASolver(agents, tasks)
     plan_GA = solver_GA.solve()
 
-    # solver_PDDL = PDDLSolver(agents, tasks)
-    # plan_PDDL = solver_PDDL.solve()
+    #solver_PDDL = PDDLSolver(agents, tasks)
+    #plan_PDDL = solver_PDDL.solve()
 
-    bs = BaseSolver(agents, tasks)
-    bs.setPlan(plan_GA)
+    #print("PDDL Plan: " + str(plan_PDDL))
+    #solver_PDDL.setPlan(plan_PDDL)
+    #print("Total time: " + str(solver_PDDL.evaluate_time()))
+    #print("Total distance: " + str(solver_PDDL.evaluate_total_distance()))
 
-    framerate = 5
+    #print()
+
+    print("GA Plan: " + str(plan_GA))
+    solver_GA.setPlan(plan_GA)
+
+    print()
+
+    print("Total time: " + str(solver_GA.evaluate_time()))
+    print("Total distance: " + str(solver_GA.evaluate_total_distance()))
+
+    #bs = BaseSolver(agents, tasks)
+    #bs.setPlan(plan_PDDL)
+    bs = solver_GA
+    
+    framerate = 10
 
     frames = bs.getGraphics(framerate)
 
