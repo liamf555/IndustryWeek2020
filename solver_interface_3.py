@@ -170,12 +170,14 @@ class Task(object):
         # Generate 'waiting frames' between agent finishing previous task and setting off for next (or waiting to set
         # off for first task).
         # Is there a more efficient way of doing this?
-        # round() as the number of frames needs to be an integer. This can cause the animation to be misleading, for example
-        # it may look like an agent is setting off before a prerequisite task has been completed, when actually due to
-        # rounding of the number of frames its displayed task duration was misrepresentatively short, or it wasn't shown to spend a representatively
-        # long time waiting at its previous task before it set off, or perhaps the motion of the agent on which it was waiting was not
-        # representatively shown (i.e. that agent didn't appear to wait long enough before it set off, and an agent depending on it may be
-        # shown to start a task before it even arrives). Animation accuracy can be improved by increasing the frame rate.
+        #
+        # round() as the number of frames needs to be an integer. This can cause the animation to be misleading, for example:
+        #  o If the number of frames for agent_x waiting to move, or for the duration of one of its tasks, is rounded up, agent_x's animation
+        #    will be behind compared with 'real time'. If agent_y is meant to wait for agent_x to complete a task before it starts moving, agent_y
+        #    might appear to set off too early, incorrectly suggesting that it is not honouring this dependency.
+        #  o Other similar situations are possible with task durations and agent dependency waiting times having their number of frames rounded up
+        #    or down.
+        # Animation accuracy can be improved by increasing the frame rate.
         for i in range(round(frame_rate * (self.start_time - prev_end_time))):
             self.frames.append(starting_coords)
 

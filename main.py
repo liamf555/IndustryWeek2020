@@ -24,6 +24,11 @@ def set_up_tasks():
     # No longer use finishing task. We don't care whether the agents return to the starting position
     # after they've finished (we don't care how long it takes them to do this or how far they have
     # to travel - this shouln't be part of the optimisation).
+    # Note: this means the PDDL problem file no longer needs to contain 'task_finish', nor
+    #   (at uav task_finish)
+    #   (at submersible task_finish)
+    #   (at boat task_finish)
+    # as part of the goal definition.
     #t5 = Task(5, Tasks.FINISH, (0, 0), 0)
     ts = [t0, t1, t2, t3, t4]
 
@@ -36,11 +41,11 @@ def set_up_agents():
     a1.addCapability(Capability.VISION)
     a1.addCapability(Capability.FLIGHT)
     a2 = Agent(1, "boat", 2, 1.5)
-    a2.addCapability(Capability.VISION)
-    a2.addCapability(Capability.SAMPLING)
+    a2.addCapability(Capability.DISPERSAL)
+    a2.addCapability(Capability.CONTAINMENT)
     a3 = Agent(2, "submersible", 4, 1)
-    a3.addCapability(Capability.DISPERSAL)
-    a3.addCapability(Capability.CONTAINMENT)
+    a3.addCapability(Capability.VISION)
+    a3.addCapability(Capability.SAMPLING)
     ats = [a1, a2, a3]
 
     # To be hardcoded/populated by mission planning system.
@@ -158,10 +163,48 @@ def set_up_agents_4():
     # To be hardcoded/populated by mission planning system.
     return { i : t for i, t in enumerate(ats)}
 
+# For testing
+def set_up_tasks_5():
+    # id, type, coords, duration
+    t0 = Task(0, Tasks.INIT, (0, 0), 0)
+    t1= Task(1, Tasks.MAPAREA, (1, 1), 5)
+    t1.addCapability(Capability.VISION)
+    t1.addCapability(Capability.FLIGHT)
+    t2 = Task(2, Tasks.SAMPLE, (2, 3), 10)
+    t2.addCapability(Capability.SAMPLING)
+    t3 = Task(3, Tasks.SAMPLE, (-4,-3), 10)
+    t3.addCapability(Capability.SAMPLING)
+    t4 = Task(4, Tasks.CONTAIN, (5, 3), 20)
+    t4.addCapability(Capability.CONTAINMENT)
+    t5 = Task(5, Tasks.CLEANUP, (2, 2), 12)
+    t5.addCapability(Capability.DISPERSAL)
+    ts = [t0, t1, t2, t3, t4, t5]
+
+    # To be hardcoded/populated by mission planning system.
+    return { i: t for i, t in enumerate(ts)}
+
+# For testing
+def set_up_agents_5():
+    # id, name, speed, turning radius -- see solver_interface_3.Agent
+    a1 = Agent(0, "uav", 3, 0.2)
+    a1.addCapability(Capability.VISION)
+    a1.addCapability(Capability.FLIGHT)
+    a1.addCapability(Capability.SAMPLING)
+    a2 = Agent(1, "boat", 2, 0.3)
+    a2.addCapability(Capability.VISION)
+    a2.addCapability(Capability.SAMPLING)
+    a2.addCapability(Capability.CONTAINMENT)
+    a3 = Agent(2, "submersible", 4, 0.1)
+    a3.addCapability(Capability.DISPERSAL)
+    ats = [a1, a2, a3]
+
+    # To be hardcoded/populated by mission planning system.
+    return { i : t for i, t in enumerate(ats)}
+
 def main():
     show_gui = True
     framerate = 10
-    solver_select = 'ga' # 'ga' or 'pddl'
+    solver_select = 'pddl' # 'ga' or 'pddl'
     #Testing
     test_scenario = None # None - run normally. Otherwise number of test scenario to be executed. 
 
@@ -187,7 +230,12 @@ def main():
         dependency_test_plan = {0:[(1, [0], 0), (3, [2], 0)], 1:[(2, [0], 0), (4, [1, 2, 3], 0)], 2:[(5, [4], 0)]}
         bs = BaseSolver(agents, tasks)
         bs.setPlan(dependency_test_plan)
-        solver_select = "testing" 
+        solver_select = "testing"
+    elif (test_scenario == 4):
+        # Testing that PDDL solver handles dependencies correctly (i.e. that it generates a plan which correctly encodes the
+        # dependencies).
+        agents = set_up_agents_5()
+        tasks = set_up_tasks_5()
 
     # There is an error if both of these solver instances/comparison code
     # are active at the same time.

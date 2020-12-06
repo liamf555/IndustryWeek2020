@@ -18,7 +18,7 @@ class PDDLSolver(BaseSolver):
     def solve(self, **kwargs) -> Dict[int, List[Tuple[int, float]]]:
         serialize_bin = kwargs.get('serialize_bin', os.path.join('..', 'universal-pddl-parser-multiagent', 'examples', 'serialize', 'serialize.bin'))
         domain_file = kwargs.get('domain_file', os.path.join('pddl', 'domain.pddl'))
-        problem_file = kwargs.get('problem_file', os.path.join('pddl', 'pb.pddl'))
+        problem_file = kwargs.get('problem_file', os.path.join('pddl', 'pb2.pddl'))
         plan = self.compile_and_solver_ma_pddl(serialize_bin, domain_file, problem_file)
 
         return plan
@@ -26,7 +26,7 @@ class PDDLSolver(BaseSolver):
 
     def compile_and_solver_ma_pddl(self, serialize_bin, domain_file, problem_file):
         out_domain_file = os.path.join('pddl', 'cl-domain.pddl')
-        out_problem_file = os.path.join('pddl', 'cl-pb.pddl')
+        out_problem_file = os.path.join('pddl', 'cl-pb2.pddl')
 
         # os.system(f'{serialize_bin} {domain_file} {problem_file} > {out_domain_file} 2> {out_problem_file}')
 
@@ -54,11 +54,10 @@ class PDDLSolver(BaseSolver):
             return self.parse_pddl_plan(plan)
 
     def parse_pddl_plan(self, plank):
-        # Set up for specific problem encoded in PDDL problem file.
         agent2num = {'uav': 0, 'boat': 1, 'submersible':2}
-        # 'task_finish' needs to be here, since it appears in the response from the solver which is parsed in the following code.
-        # However, it doesn't need to reference an actual Task object, as it isn't added to the predecessors list.
-        task2num = {'task_init': 0, 'task_maparea': 1, 'task_sample':2, 'task_containment':3, 'task_cleanup': 4, 'task_finish':-1}
+        # 'task_finish' removed as it no longer appears in a 'do-move-to-task' statement in the returned solution file due to modifications made to
+        # the PDDL problem file.
+        task2num = {'task_init': 0, 'task_maparea': 1, 'task_sample':2, 'task_sample_2':3, 'task_containment':4, 'task_cleanup': 5}#, 'task_finish':6}
         plan = {0: [], 1:[], 2:[]}
         predecessors = copy.deepcopy(plan)
         for i, p in enumerate(plank):
